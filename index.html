@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zaki Restoran - Home</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background:#f5e7db; 
+      margin:0; 
+      display:flex; 
+      gap:15px; 
+      padding:15px; 
+    }
+
+    /* Header Full */
+    .header {
+      position:fixed;
+      top:0; left:0; right:0;
+      background:#8b6f4e; 
+      color:white; 
+      padding:15px; 
+      text-align:center; 
+      font-size:22px; 
+      font-weight:bold;
+      z-index:1000;
+    }
+    body { padding-top:70px; } /* biar konten tidak ketutup header */
+
+    /* Sidebar Keranjang */
+    .sidebar {
+      width:220px;
+      background:white;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      height:fit-content;
+      flex-shrink:0;
+    }
+    .sidebar h3 { text-align:center; margin-bottom:8px; color:#8b6f4e; }
+    .cart-item { display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px; }
+    .total { font-weight:bold; margin-top:8px; text-align:right; }
+    .btn-cart { background:#27ae60; color:white; padding:8px; width:100%; border:none; border-radius:5px; cursor:pointer; margin-top:8px; }
+    .btn-cart:hover { background:#219150; }
+
+    /* Filter */
+    .filter-box {
+      margin-top:12px;
+      border-top:1px solid #ccc;
+      padding-top:10px;
+    }
+    .filter-box label {
+      font-size:14px; 
+      font-weight:bold; 
+      color:#8b6f4e; 
+      display:block;
+      margin-bottom:5px;
+    }
+    .filter-box select {
+      width:100%; 
+      padding:6px; 
+      border-radius:5px; 
+      border:1px solid #aaa;
+    }
+
+    .cara-pesan {
+      margin-top: 15px;
+      padding: 12px;
+      background: #fff8f0;
+      border: 1px solid #e0c3a5;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .cara-pesan h3 {
+      margin: 0 0 8px 0;
+      color: #8b6f4e;
+    }
+
+    .cara-pesan ol {
+      margin: 0;
+      padding-left: 18px;
+      color: #5a4e4d;
+      line-height: 1.5;
+    }
+
+
+    /* Main Content */
+    .main { flex:1; text-align:center; }
+    .menu-items { 
+      display:grid; 
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); 
+      gap:10px; 
+      justify-items:center; 
+    }
+    .menu-item { 
+      background:#f9f9f9; 
+      border:1px solid #ccc; 
+      border-radius:10px; 
+      text-align:center; 
+      overflow:hidden; 
+      transition:.3s; 
+      width:150px;
+      display:flex;
+      flex-direction:column;
+    }
+    .menu-item img { 
+      width:100%; 
+      height:120px; 
+      object-fit:cover; 
+      flex-shrink:0;
+    }
+    .menu-item p { 
+      background:#ff5722; 
+      color:white; 
+      margin:0; 
+      padding:8px; 
+      font-size:14px; 
+      flex-shrink:0;
+    }
+    .menu-item:hover { transform:scale(1.25); }
+  </style>
+</head>
+<body>
+  <!-- Sidebar Keranjang -->
+  <div class="sidebar">
+    <h3>Keranjang</h3>
+    <div id="cart-preview"></div>
+    <div class="total" id="cart-total"></div>
+    <button class="btn-cart" onclick="window.location.href='keranjang.html'">Lihat Keranjang</button>
+    
+    <!-- Filter Menu -->
+    <div class="filter-box">
+      <label for="filter-menu">Filter Menu:</label>
+      <select id="filter-menu">
+        <option value="all">Semua</option>
+        <option value="makanan">Makanan</option>
+        <option value="minuman">Minuman</option>
+        <option value="cemilan">Cemilan</option>
+      </select>
+    </div>
+    
+    <div class="cara-pesan">
+      <h3>Cara Memesan</h3>
+      <ol>
+        <li>Silakan pilih menu dan tambahkan menu ke keranjang</li>
+        <li>Gunakan filter untuk memudahkan pencarian menu</li>
+        <li>Lihat keranjang pada bagian samping</li>
+        <li>Pastikan menu sesuai dengan yang dipilih</li>
+        <li>Pilih metode pembayaran dan tekan <b>Bayar Pesanan</b></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="header">Zaki Restoran</div>
+    <div class="menu-items">
+      <!-- Makanan -->
+      <a href="lele_krispy.html" class="menu-item" data-kategori="makanan">
+        <img src="https://img-global.cpcdn.com/recipes/0a6b9f01630d1ee7/680x482cq70/pecel-lele-crispy-foto-resep-utama.jpg" alt="Lele Krispy"/>
+        <p>Lele Krispy</p>
+      </a>
+      <a href="pizza.html" class="menu-item" data-kategori="makanan">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d1/Pepperoni_pizza.jpg" alt="Pizza"/>
+        <p>Pizza</p>
+      </a>
+      <a href="katsu.html" class="menu-item" data-kategori="makanan">
+        <img src="https://asset.kompas.com/crops/IhRr-L1015uj0RO0VOh1vUuxRlQ=/100x71:900x605/750x500/data/photo/2023/08/23/64e563cc73876.jpg" alt="Katsu"/>
+        <p>Katsu</p>
+      </a>
+      <a href="mie_ayam.html" class="menu-item" data-kategori="makanan">
+        <img src="https://i.ytimg.com/vi/QiZt1ALYVEQ/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCvsiWPunf-Yh1MTqZcv8sGKooajw" alt="Mie Ayam"/>
+        <p>Mie Ayam</p>
+      </a>
+      <a href="nasi_goreng.html" class="menu-item" data-kategori="makanan">
+        <img src="https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2025/03/11082616/5-Resep-Nasi-Goreng-Sederhana-hingga-Spesial-Mudah-dan-Praktis.jpg" alt="Nasi Goreng"/>
+        <p>Nasi Goreng</p>
+      </a>
+      <a href="nasi_goreng_spesial.html" class="menu-item" data-kategori="makanan">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMAaXCz7kB9PiWQVHRJLacjgbkdGXaVDL0BA&s" alt="Nasi Goreng Spesial"/>
+        <p>Nasi Goreng Spesial</p>
+      </a>
+      <a href="nasi_goreng_seafood.html" class="menu-item" data-kategori="makanan">
+        <img src="https://asset.kompas.com/crops/3xYktcut3GtTLSvS9iNgqM4e380=/0x0:1000x667/1200x800/data/photo/2023/05/06/645677f368fc1.jpg" alt="Nasi Goreng Seafood"/>
+        <p>Nasi Goreng Seafood</p>
+      </a>
+      <a href="pisang_goreng_krispy.html" class="menu-item" data-kategori="cemilan">
+        <img src="https://img-global.cpcdn.com/recipes/a33e0186fbf1e510/680x781cq80/pisang-goreng-crispy-coklat-keju-foto-resep-utama.jpg" alt="Pisang Goreng Krispy"/>
+        <p>Pisang Goreng Krispy</p>
+      </a>
+      <a href="Nasi putih.html" class="menu-item" data-kategori="makanan">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUh5bqsScdDcVemchIUMuL9fTfPspPFFwZIg&s" alt="Nasi Putih"/>
+        <p>Nasi Putih</p>
+      </a>
+
+      <!-- Minuman -->
+      <a href="es_campur.html" class="menu-item" data-kategori="minuman">
+        <img src="https://i.gojekapi.com/darkroom/gofood-indonesia/v2/images/uploads/03598cb3-b133-4fa7-b8a3-f3c40a265bae_Go-Biz_20230803_092904.jpeg?auto=format" alt="Es Campur"/>
+        <p>Es Campur</p>
+      </a>
+      <a href="es_jeruk.html" class="menu-item" data-kategori="minuman">
+        <img src="https://doktersehat.com/wp-content/uploads/2018/09/jus-jeruk.jpg" alt="Es Jeruk"/>
+        <p>Es Jeruk</p>
+      </a>
+      <a href="es_teh.html" class="menu-item" data-kategori="minuman">
+        <img src="https://cdn.rri.co.id/berita/Palangkaraya/o/1731306045976-es_teh48a08e583122/kpvmgtuk4u5g93n.jpeg" alt="Es Teh"/>
+        <p>Es Teh</p>
+      </a>
+      <a href="jus_alpukat.html" class="menu-item" data-kategori="minuman">
+        <img src="https://img-global.cpcdn.com/recipes/7c00dccb6e391d82/680x781cq80/jus-alpukat-sederhana-foto-resep-utama.jpg" alt="Jus Alpukat"/>
+        <p>Jus Alpukat</p>
+      </a>
+      <a href="es_kelapa.html" class="menu-item" data-kategori="minuman">
+        <img src="https://rajominang.id/blog/uploads/images/202407/image_750x_66a2f8735a879.jpg" alt="Es kelapa"/>
+        <p>Es kelapa</p>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function loadCartPreview() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const preview = document.getElementById('cart-preview');
+      const totalDiv = document.getElementById('cart-total');
+      preview.innerHTML = '';
+      let total = 0;
+
+      if (cart.length === 0) {
+        preview.innerHTML = '<p>Keranjang kosong.</p>';
+        totalDiv.innerHTML = '';
+        return;
+      }
+
+      cart.slice(0,3).forEach(item => {
+        preview.innerHTML += `
+          <div class="cart-item">
+            <span>${item.nama} x${item.jumlah}</span>
+            <span>Rp ${(item.harga * item.jumlah).toLocaleString()}</span>
+          </div>
+        `;
+        total += item.harga * item.jumlah;
+      });
+
+      if (cart.length > 3) {
+        preview.innerHTML += `<p>+${cart.length - 3} item lagi...</p>`;
+      }
+
+      totalDiv.innerHTML = `Total: Rp ${total.toLocaleString()}`;
+    }
+
+    // Filter menu
+    document.getElementById('filter-menu').addEventListener('change', function() {
+      const value = this.value;
+      const items = document.querySelectorAll('.menu-item');
+      items.forEach(item => {
+        if (value === 'all' || item.dataset.kategori === value) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+
+    loadCartPreview();
+  </script>
+</body>
+</html>

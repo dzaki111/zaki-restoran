@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keranjang & Pembayaran | Restoran Zaki</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5e7db;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #5a4634;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: #5a4634;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+        }
+
+        .cart-item > span { 
+            font-weight: bold; 
+            flex-basis: 30%;
+        }
+
+        .cart-item > div {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            flex-basis: 70%;
+            justify-content: flex-end;
+        }
+        
+        .cart-item button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .cart-item button:hover { opacity:0.8; }
+        .cart-item button:active { opacity:0.6; }
+
+        .remove { background: #e74c3c; color: white; }
+
+        .total { 
+            text-align: right; 
+            font-size: 1.2em; 
+            font-weight: bold; 
+            margin-top: 20px; 
+            padding-top: 10px; 
+            border-top: 2px solid #ddd;
+            color: #2c3e50;
+        }
+
+        .payment-input {
+            margin-bottom: 15px;
+        }
+
+        #payment-method, .payment-input input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            background: #f9f9f9;
+            box-sizing: border-box;
+        }
+
+        .payment-input label { 
+            display: block; 
+            margin-bottom: 5px; 
+            color: #5a4634; 
+            font-weight: bold;
+        }
+
+        .checkout, .cancel, .back {
+            color: white; 
+            padding: 15px; 
+            width: 100%; 
+            border: none; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            box-sizing: border-box;
+            transition: background 0.2s, opacity 0.2s;
+            font-weight: bold;
+        }
+
+        .checkout { background: #27ae60; }
+        .cancel { background: #e74c3c; }
+        .back { background: #3498db; }
+        .back[style*="#e67e22"] { 
+            background: #e67e22 !important;
+            margin-top:5px; 
+        }
+
+        .checkout:hover, .cancel:hover, .back:hover { opacity: 0.9; }
+
+        .toast {
+            visibility: hidden; 
+            min-width: 250px; 
+            background-color: #333; 
+            color: #fff;
+            text-align: center; 
+            border-radius: 8px; 
+            padding: 12px; 
+            position: fixed;
+            z-index: 10000; 
+            left: 50%; 
+            top: 10%; 
+            transform: translate(-50%, 0);
+            font-size: 16px; 
+            opacity: 0; 
+            transition: opacity 0.5s;
+        }
+        .toast.show { visibility: visible; opacity: 1; }
+
+        #print-area {
+            display: none;
+            width: 80mm;
+            margin: 0 auto;
+        }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { 
+                position: absolute; top: 0; left: 0; 
+                width: 40mm;
+                margin: 0; 
+                padding: 0;
+                font-family: monospace;
+                font-size: 10px;
+            }
+            #print-area h3, #print-area p { margin: 3px 0; }
+            #print-area hr { border-top: 1px dashed #000; border-bottom: none; }
+        }
+    </style>
+</head>
+
+<body onload="loadCart()">
+    <div class="container">
+        <h2>Keranjang & Pembayaran</h2>
+        
+        <div id="cart-items"></div>
+        
+        <div class="total" id="cart-total"></div>
+
+        <div class="payment">
+            <h3>Informasi Pelanggan & Pembayaran</h3>
+
+            <div class="payment-input">
+                <label for="customer-name">Nama Pelanggan:</label>
+                <input type="text" id="customer-name" placeholder="Masukkan Nama Pelanggan" required>
+            </div>
+
+            <div class="payment-input">
+                <label for="customer-phone">Nomor Telepon:</label>
+                <input type="tel" id="customer-phone" placeholder="Cth: 0812345678" required>
+            </div>
+
+            <label for="payment-method">Metode Pembayaran:</label>
+            <select id="payment-method">
+                <option value="Cash">Cash</option>
+                <option value="Transfer">Transfer Bank</option>
+                <option value="Qris">Qris</option>
+            </select>
+
+            <!-- ===========================
+                 QRIS BOX (TAMBAHAN)
+            ============================ -->
+            <div id="qris-box" style="display:none; margin-top:15px; text-align:center;">
+                <p style="margin-bottom:5px; font-weight:bold; color:#5a4634;">Scan QRIS untuk Membayar:</p>
+                <img id="qris-img" src="qris.jpg" 
+                     style="width:160px; height:160px; object-fit:contain;">
+            </div>
+
+            <button class="checkout" onclick="checkout()">Bayar Pesanan </button>
+            <button class="cancel" onclick="cancelOrder()">Batal Pesanan </button>
+            <a href="index.html" class="back">Kembali ke Menu </a>
+            <a href="transaksi.html" class="back" style="background:#e67e22;">Lihat Data Transaksi (Perlu PIN) </a>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <div id="print-area"></div>
+
+    <script>
+        function showToast(msg) { 
+            let t = document.getElementById("toast"); 
+            t.innerText = msg; 
+            t.className = "toast show"; 
+            setTimeout(() => t.className = t.className.replace("show", ""), 2000); 
+        }
+
+        function loadCart() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let c = document.getElementById('cart-items'); 
+            let t = document.getElementById('cart-total');
+            c.innerHTML = ''; 
+            let total = 0;
+
+            if (cart.length === 0) { 
+                c.innerHTML = '<p style="text-align:center; color:#777;">Keranjang kosong.</p>'; 
+                t.innerHTML = ""; 
+                return; 
+            }
+
+            cart.forEach((item, i) => {
+                let s = item.harga * item.jumlah;
+                c.innerHTML += `
+                    <div class='cart-item'>
+                        <span>${item.nama}</span>
+                        <div>
+                            <button onclick="updateQuantity(${i},-1)">-</button>
+                            <span>${item.jumlah}</span>
+                            <button onclick="updateQuantity(${i},1)">+</button>
+                            <span style="min-width: 150px; text-align: right;">
+                                Rp ${item.harga.toLocaleString('id-ID')} x ${item.jumlah} =
+                                <b>Rp ${s.toLocaleString('id-ID')}</b>
+                            </span>
+                            <button class='remove' onclick="removeItem(${i})">Hapus</button>
+                        </div>
+                    </div>
+                `;
+                total += s;
+            });
+            t.innerHTML = `Total: Rp ${total.toLocaleString('id-ID')}`;
+        }
+
+        function updateQuantity(i, c) { 
+            let cart = JSON.parse(localStorage.getItem('cart')) || []; 
+            cart[i].jumlah += c; 
+            if (cart[i].jumlah <= 0) cart.splice(i, 1); 
+            localStorage.setItem('cart', JSON.stringify(cart)); 
+            loadCart(); 
+        }
+
+        function removeItem(i) { 
+            let cart = JSON.parse(localStorage.getItem('cart')) || []; 
+            cart.splice(i, 1); 
+            localStorage.setItem('cart', JSON.stringify(cart)); 
+            loadCart(); 
+        }
+
+        function cancelOrder() { 
+            if (confirm("Yakin batal? Semua item di keranjang akan dihapus.")) { 
+                localStorage.removeItem('cart'); 
+                showToast("Pesanan dibatalkan!"); 
+                setTimeout(() => location.href = "index.html", 1200); 
+            }
+        }
+
+        function checkout() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) return showToast("Keranjang kosong!");
+
+            let nama = document.getElementById('customer-name').value.trim();
+            let hp = document.getElementById('customer-phone').value.trim();
+            if (!nama || !hp) return showToast("Nama dan No HP wajib diisi!");
+
+            loadCart();
+            let totalDiv = document.getElementById('cart-total').innerText;
+            let total = parseInt(totalDiv.replace('Total: Rp ', '').replace(/\./g, ''));
+            
+            let metode = document.getElementById('payment-method').value;
+            let summary = cart.map(i => `${i.nama} x${i.jumlah}`).join('; ');
+
+            let trs = JSON.parse(localStorage.getItem('transactions')) || [];
+            let id = Date.now();
+
+            trs.push({
+                id: id,
+                waktu: new Date().toLocaleString('id-ID'),
+                nama: nama,
+                telepon: hp,
+                total: total,
+                metode: metode,
+                detail: summary
+            });
+            localStorage.setItem('transactions', JSON.stringify(trs));
+
+            generateStruk(id, nama, hp, cart, total, metode);
+            localStorage.removeItem('cart');
+            
+            setTimeout(() => { 
+                window.print();
+                setTimeout(() => {
+                    window.location.href = "index.html"; 
+                }, 800);
+            }, 500);
+        }
+
+        function generateStruk(id, nama, hp, cart, total, metode) {
+            let box = document.getElementById('print-area');
+            box.style.display = 'block';
+
+            let list = "";
+            cart.forEach(i => { 
+                list += `<p style="display:flex; justify-content:space-between; margin: 3px 0;">
+                            <span>${i.nama} x${i.jumlah}</span> 
+                            <span>Rp ${(i.harga * i.jumlah).toLocaleString('id-ID')}</span>
+                         </p>`; 
+            });
+
+            box.innerHTML = `
+                <div style="padding: 10px; font-family: monospace; font-size: 12px; line-height: 1.5;">
+                    <h3 style="text-align: center; margin-bottom: 5px; font-size: 1.2em;">RESTORAN ZAKI</h3>
+                    <p style="text-align: center; margin-top: 0; font-size: 0.9em;">Terima Kasih Atas Kunjungan Anda</p>
+                    <hr style="border-top: 1px dashed #000; border-bottom: none; margin: 5px 0;">
+                    <p>Invoice: ${id}</p>
+                    <p>Waktu: ${new Date().toLocaleString('id-ID')}</p>
+                    <p>Nama: ${nama}</p>
+                    <p>HP: ${hp}</p>
+                    <hr style="border-top: 1px dashed #000; border-bottom: none; margin: 5px 0;">
+                    <b>Pesanan:</b>
+                    ${list}
+                    <hr style="border-top: 1px dashed #000; border-bottom: none; margin: 5px 0;">
+                    <p style="display:flex; justify-content:space-between; font-weight:bold;">
+                        <span>Total:</span> 
+                        <span>Rp ${total.toLocaleString('id-ID')}</span>
+                    </p>
+                    <p>Pembayaran: ${metode}</p>
+                    <hr style="border-top: 1px dashed #000; border-bottom: none; margin: 5px 0;">
+                    <p style='text-align:center;'>Sampai jumpa kembali di restoran Zaki</p>
+                </div>
+            `;
+        }
+
+        /* ==========================
+           QRIS AUTO SHOW / HIDE
+        ========================== */
+        document.getElementById("payment-method").addEventListener("change", function () {
+            let metode = this.value;
+            let box = document.getElementById("qris-box");
+
+            if (metode === "Qris") {
+                box.style.display = "block";
+            } else {
+                box.style.display = "none";
+            }
+        });
+    </script>
+
+</body>
+</html>

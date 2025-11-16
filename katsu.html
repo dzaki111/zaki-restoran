@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Katsu - Zaki Restoran</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background:#f5e7db; 
+      margin:0; 
+      padding:20px; 
+    }
+    .container { 
+      max-width:600px; 
+      margin:auto; 
+      background:white; 
+      padding:20px; 
+      border-radius:10px; 
+      box-shadow:0 4px 10px rgba(0,0,0,.1); 
+    }
+    img { 
+      width:100%; 
+      border-radius:10px; 
+      margin-bottom:20px; 
+    }
+    h2 { 
+      color:#5a4e4d; 
+    }
+    .btn { 
+      display:block; 
+      width:100%; 
+      padding:12px; 
+      margin-top:10px; 
+      border:none; 
+      border-radius:8px; 
+      font-size:16px; 
+      cursor:pointer; 
+    }
+    .btn.add { 
+      background:#27ae60;
+      color:white; 
+    }
+    .btn.add:hover { background:#004b1f; }
+    .btn.back { 
+      background:#3498db; 
+      color:white; 
+    }
+    .btn.back:hover { background:#ff0000; }
+
+    /* toast notif */
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.5s, bottom 0.5s;
+    }
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+      bottom: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://asset.kompas.com/crops/IhRr-L1015uj0RO0VOh1vUuxRlQ=/100x71:900x605/750x500/data/photo/2023/08/23/64e563cc73876.jpg" alt="Katsu"/>
+    <h2>Katsu</h2>
+    <p>Katsu ayam ala Jepang, digoreng renyah, disajikan dengan saus spesial Zaki Restoran.</p>
+    <p><strong>Harga: Rp 25.000</strong></p>
+    <button class="btn add" onclick="addToCart()">Tambah ke Keranjang</button>
+    <button class="btn back" onclick="window.location.href='index.html'">Kembali ke Menu</button>
+  </div>
+
+  <!-- toast -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    function showToast(message) {
+      let toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.className = "toast show";
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+    }
+
+    function addToCart() {
+      const item = { nama: "Katsu", harga: 25000, jumlah: 1 };
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existing = cart.find(i => i.nama === item.nama);
+      if (existing) {
+        existing.jumlah += 1;
+      } else {
+        cart.push(item);
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      showToast("Katsu berhasil ditambahkan ke keranjang!");
+    }
+  </script>
+</body>
+</html>

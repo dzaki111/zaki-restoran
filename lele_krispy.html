@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lele Krispy</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f5e7db; margin:0; padding:20px; }
+    .container { max-width:600px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+    img { width:100%; border-radius:10px; }
+    h2 { margin-top:10px; }
+    .btn {
+      display:block;
+      width:100%;
+      padding:12px;
+      font-size:16px;
+      font-weight:bold;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      margin-top:10px;
+      color:white;
+      transition:0.2s;
+    }
+    .btn-green { background:#27ae60; }
+    .btn-green:hover { background:#004b1f; }
+    .btn-blue { background:#3498db; }
+    .btn-blue:hover { background:#ff0000; }
+
+    /* toast notif */
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.5s, bottom 0.5s;
+    }
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+      bottom: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://img-global.cpcdn.com/recipes/0a6b9f01630d1ee7/680x482cq70/pecel-lele-crispy-foto-resep-utama.jpg" alt="Lele Krispy">
+    <h2>Lele Krispy</h2>
+    <p>Lele goreng krispy khas Zaki Restoran, gurih, renyah, cocok untuk makan siang maupun malam.</p>
+    <p><b>Harga: Rp 15.000</b></p>
+
+    <!-- Pilihan tambahan -->
+    <h3>Tambahan Toping Extra:</h3>
+    <label><input type="checkbox" value="5000" data-nama="Keju"> Keju +Rp 5.000</label><br>
+
+    <button class="btn btn-green" onclick="tambahKeranjang()">Tambah ke Keranjang</button>
+    <a href="index.html"><button class="btn btn-blue">Kembali ke Menu</button></a>
+  </div>
+
+  <!-- toast -->
+  <div id="toast" class="toast">Lele Krispy ditambahkan ke keranjang!</div>
+
+  <script>
+    function tambahKeranjang() {
+      let baseItem = { nama: "Lele Krispy", harga: 15000, jumlah: 1 };
+      let checkboxes = document.querySelectorAll("input[type=checkbox]:checked");
+      let tambahan = [];
+      let extraHarga = 0;
+
+      checkboxes.forEach(cb => {
+        tambahan.push(cb.dataset.nama);
+        extraHarga += parseInt(cb.value);
+      });
+
+      if (tambahan.length > 0) {
+        baseItem.nama += " + " + tambahan.join(", ");
+        baseItem.harga += extraHarga;
+      }
+
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(baseItem);
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      // Tampilkan toast
+      let toast = document.getElementById("toast");
+      toast.className = "toast show";
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+    }
+  </script>
+</body>
+</html>
