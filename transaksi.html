@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Transaksi Kasir</title>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style>
+/* ====================
+GLOBAL & CONTAINER 
+==================== */
+body { 
+    font-family: Arial, sans-serif; 
+    background: #f5e7db;
+    padding: 20px; 
+}
+.container { 
+    max-width: 1100px; 
+    margin: auto; 
+    background: white; 
+    padding: 20px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+}
+h2 { 
+    text-align: center; 
+    color: #5a4634; 
+    margin-bottom: 5px;
+}
+.error { 
+    color: #e74c3c; 
+    font-weight: bold; 
+    margin-top: 10px; 
+}
+
+/* ====================
+CLOCK 
+==================== */
+#live-clock {
+    text-align: center;
+    font-size: 1.1em;
+    color: #7f8c8d;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* ====================
+LOGIN
+==================== */
+#auth-section { 
+    text-align: center; 
+    margin-top: 50px; 
+}
+#auth-section input { 
+    padding: 10px; 
+    font-size: 16px; 
+    margin-bottom: 10px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px;
+    display: block;
+    width: 80%;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#auth-section button { 
+    background: #3498db;
+    color: white; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+}
+#auth-section button:hover { 
+    background: #2980b9; 
+}
+
+#transaction-data { 
+    margin-top: 20px; 
+    display: none; 
+}
+
+/* ====================
+SEARCH
+==================== */
+.search-container {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    align-items: center;
+}
+.search-container input[type="text"] {
+    flex-grow: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.search-container button {
+    background: #2c3e50; 
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.search-container button:hover {
+    background: #1a242f;
+}
+
+/* ====================
+TABLE
+==================== */
+#printable-table {
+    background: white; 
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    overflow-x: auto;
+}
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    min-width: 800px;
+}
+th, td { 
+    border: 1px solid #ddd; 
+    padding: 8px; 
+    font-size: 14px; 
+}
+th { 
+    background: #f2f2f2; 
+    color: #555; 
+}
+
+/* ====================
+BUTTONS
+==================== */
+.action-buttons {
+    margin-top: 15px; 
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 10px;
+}
+.action-buttons button, .action-buttons a {
+    padding: 10px 15px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+.export-btn { background: #2ecc71; }
+.export-btn:hover { background: #27ae60; }
+.delete-btn { background: #e74c3c; }
+.delete-btn:hover { background: #c0392b; }
+.back-btn { background: #3498db; }
+.back-btn:hover { background: #2980b9; }
+.save-img-btn { background: #f39c12; }
+.save-img-btn:hover { background: #e67e22; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Data Transaksi Harian</h2>
+    <div id="live-clock"></div>
+
+    <!-- LOGIN SECTION -->
+    <div id="auth-section">
+        <p>Masukkan <b>Username</b> dan <b>Password</b> untuk melihat data transaksi:</p>
+        <input type="text" id="username-input" placeholder="Masukkan Username">
+        <input type="password" id="password-input" placeholder="Masukkan Password">
+        <button onclick="checkCredentials()">Lihat Data</button>
+        <p id="auth-error" class="error"></p>
+    </div>
+
+    <!-- DATA SECTION -->
+    <div id="transaction-data">
+
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Cari Nama, Invoice, atau Waktu..." 
+                   oninput="loadTransactions(this.value.toLowerCase())">
+            <button onclick="loadTransactions(document.getElementById('search-input').value.toLowerCase())">
+                Cari Data
+            </button>
+            <button onclick="document.getElementById('search-input').value = ''; loadTransactions('')" 
+                    style="background:#95a5a6;">
+                Tampilkan Semua
+            </button>
+            <button onclick="loadTransactions(document.getElementById('search-input').value.toLowerCase())" 
+                    style="background:#e67e22;">
+                Segarkan Data
+            </button>
+        </div>
+
+        <div id="printable-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice/ID</th>
+                        <th>Waktu</th>
+                        <th>Nama Pelanggan</th>
+                        <th>Nomor Telepon</th>
+                        <th>Total</th>
+                        <th>Metode</th>
+                        <th>Detail Pesanan</th>
+                    </tr>
+                </thead>
+                <tbody id="data-body"></tbody>
+                <tr id="income-row">
+                    <td colspan="7" style="font-weight:bold; background:#f9f9f9;">
+                        Total Pendapatan: Rp 0
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="action-buttons">
+            <a href="index.html" class="back-btn">Kembali</a>
+            <button class="export-btn" onclick="exportToCsv()">Simpan CSV/Excel</button>
+            <button class="save-img-btn" onclick="saveTransactionImage()">Simpan Gambar</button>
+            <button class="delete-btn" onclick="clearTransactions()">Hapus Semua Data</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// JAM REALTIME
+function updateClock() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    const timeStr = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    document.getElementById('live-clock').innerHTML = `${dateStr}, ${timeStr} WIB`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// LOGIN
+const CORRECT_USERNAME = "zaki"; 
+const CORRECT_PASSWORD = "12345";
+
+function checkCredentials() {
+    const u = document.getElementById('username-input').value;
+    const p = document.getElementById('password-input').value;
+    const err = document.getElementById('auth-error');
+
+    if (u === CORRECT_USERNAME && p === CORRECT_PASSWORD) {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('transaction-data').style.display = 'block';
+        loadTransactions('');
+    } else {
+        err.innerText = "Username atau Password salah!";
+    }
+}
+
+// FORMAT TANGGAL
+function getFormattedDate() {
+    return new Date().toISOString().slice(0,10);
+}
+
+// LOAD DATA
+function loadTransactions(searchTerm = '') {
+
+    const all = JSON.parse(localStorage.getItem('transactions')) || [];
+    const dataBody = document.getElementById('data-body');
+    const incomeRow = document.getElementById('income-row');
+
+    const term = searchTerm.trim().toLowerCase();
+
+    const filtered = all.filter(tx => {
+        if (!term) return true;
+        return (
+            (tx.nama||'').toLowerCase().includes(term) ||
+            (tx.id||'').toLowerCase().includes(term) ||
+            (tx.waktu||'').toLowerCase().includes(term)
+        );
+    });
+
+    dataBody.innerHTML = "";
+
+    if (filtered.length === 0) {
+        dataBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Tidak ada data ditemukan.</td></tr>`;
+        incomeRow.innerHTML = `<td colspan="7">Total Pendapatan: Rp 0</td>`;
+        return;
+    }
+
+    let totalIncome = 0;
+
+    filtered
+        .slice()
+        .reverse()
+        .forEach(tx => {
+
+        const total = Number(tx.total) || 0;
+        totalIncome += total;
+
+        dataBody.innerHTML += `
+            <tr>
+                <td>${tx.id}</td>
+                <td>${tx.waktu}</td>
+                <td>${tx.nama}</td>
+                <td>${tx.telepon}</td>
+                <td style="text-align:right;">Rp ${total.toLocaleString('id-ID')}</td>
+                <td>${tx.metode}</td>
+                <td>${tx.detail}</td>
+            </tr>
+        `;
+    });
+
+    incomeRow.innerHTML = `
+        <td colspan="7" style="font-weight:bold; background:#f9f9f9;">
+            Total Pendapatan: Rp ${totalIncome.toLocaleString('id-ID')}
+        </td>
+    `;
+}
+
+// HAPUS DATA
+function clearTransactions() {
+    if (confirm("Yakin ingin menghapus semua data transaksi?")) {
+        localStorage.removeItem('transactions');
+        loadTransactions('');
+    }
+}
+
+// EXPORT CSV
+function exportToCsv() {
+    const data = JSON.parse(localStorage.getItem('transactions')) || [];
+    if (data.length === 0) return alert("Tidak ada data!");
+
+    const delimiter = ";";
+    let csv = "Invoice;Waktu;Nama;Telepon;Total;Metode;Detail\n";
+
+    let totalIncome = 0;
+
+    data.forEach(tx => {
+        const total = Number(tx.total) || 0;
+        totalIncome += total;
+
+        csv += `${tx.id};${tx.waktu};${tx.nama};${tx.telepon};${total};${tx.metode};${tx.detail}\n`;
+    });
+
+    csv += `\nTotal Pendapatan;;;${totalIncome};;;\n`;
+
+    const blob = new Blob(["\ufeff"+csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Data_Transaksi_${getFormattedDate()}.csv`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+// SAVE AS PNG
+function saveTransactionImage() {
+    const table = document.getElementById("printable-table");
+    html2canvas(table, { scale: 2 }).then(canvas => {
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = `Laporan_Transaksi_${getFormattedDate()}.png`;
+        a.click();
+    });
+}
+
+</script>
+
+</body>
+</html>
